@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+import { apiFetchWithAuth } from "@/lib/api";
 
 export default function PublishButton({
   product,
@@ -18,13 +17,9 @@ export default function PublishButton({
   const handlePublish = async () => {
     setStatus("publishing");
     try {
-      const res = await fetch(`${API_URL}/products/${product.slug}/publish`, {
+      await apiFetchWithAuth(`/products/${product.slug}/publish`, token, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-      if (!res.ok) throw new Error("Failed to publish");
       setStatus("published");
       router.refresh();
     } catch {

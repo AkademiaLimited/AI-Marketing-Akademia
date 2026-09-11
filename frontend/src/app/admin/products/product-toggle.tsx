@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+import { apiFetchWithAuth } from "@/lib/api";
 
 export default function ProductToggle({
   product,
@@ -15,15 +14,10 @@ export default function ProductToggle({
 
   async function toggle() {
     try {
-      const res = await fetch(`${API_URL}/products/${product.slug}`, {
+      await apiFetchWithAuth(`/products/${product.slug}`, token, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ published: !product.published }),
       });
-      if (!res.ok) throw new Error("Failed to update product");
       router.refresh();
     } catch (err) {
       console.error(err);

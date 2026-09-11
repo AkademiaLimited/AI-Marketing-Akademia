@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetchWithAuth } from "@/lib/api";
 import type { Lead, LeadStatus } from "@/types";
 import LeadStatusForm from "./lead-status-form";
-import { useAuth } from "../_components/auth-context";
+import { useAuth } from "../../_components/auth-context";
 
 const statusStyles: Record<LeadStatus, string> = {
   new: "bg-blue-100 text-blue-800",

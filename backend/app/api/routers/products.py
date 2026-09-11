@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from celery import chain
 
 from app.core.database import get_db
+from app.api.routers.auth import get_current_admin
 from app.core.celery_app import celery_app
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductOut
@@ -27,7 +28,7 @@ async def get_product(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/", response_model=ProductOut, status_code=201)
-async def create_product(payload: ProductCreate, db: AsyncSession = Depends(get_db)):
+async def create_product(payload: ProductCreate, db: AsyncSession = Depends(get_db), _admin=Depends(get_current_admin)):
     product = Product(**payload.model_dump())
     db.add(product)
     await db.commit()
@@ -36,7 +37,7 @@ async def create_product(payload: ProductCreate, db: AsyncSession = Depends(get_
 
 
 @router.patch("/{slug}", response_model=ProductOut)
-async def update_product(slug: str, payload: dict, db: AsyncSession = Depends(get_db)):
+async def update_product(slug: str, payload: dict, db: AsyncSession = Depends(get_db), _admin=Depends(get_current_admin)):
     result = await db.execute(select(Product).where(Product.slug == slug))
     product = result.scalar_one_or_none()
     if not product:
@@ -50,7 +51,7 @@ async def update_product(slug: str, payload: dict, db: AsyncSession = Depends(ge
 
 
 @router.post("/{slug}/publish", response_model=ProductOut)
-async def publish_product(slug: str, db: AsyncSession = Depends(get_db)):
+async def publish_product(slug: str, db: AsyncSession = Depends(get_db), _admin=Depends(get_current_admin)):
     """
     Publish a product and trigger the automated marketing pipeline.
 
