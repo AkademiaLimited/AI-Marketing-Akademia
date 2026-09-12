@@ -13,7 +13,9 @@ This document is for product owners, maintainers, developers, and operators. It 
 
 | Capability | Current state |
 |---|---|
-| Admin authentication | Implemented with JWT and bcrypt. |
+| Admin authentication | Implemented with JWT (HS256, 30-min expiry) and bcrypt password hashing. |
+| Password policy | Enforced: min 8 chars, uppercase, lowercase, digit required. |
+| Login rate limiting | Implemented: 5 attempts per 5 minutes per IP address. |
 | Product, lead, campaign, email, automation, and content CRUD | Implemented through FastAPI endpoints and admin forms. |
 | Dashboard metrics | Calculated from database rows; no dashboard counters are hardcoded. |
 | Demo data | Opt-in with `DEMO_DATA=true`; default is `false`. |
@@ -31,7 +33,20 @@ This document is for product owners, maintainers, developers, and operators. It 
 
 Important: the current marketing publishing task creates fake URLs and marks them as published. It does not call Instagram, LinkedIn, email, or any other external delivery API.
 
-## 3. System Architecture
+## 3. Security Controls
+
+| Control | Implementation |
+|---|---|
+| JWT signing | HS256 with auto-generated 32+ char `SECRET_KEY` (never a default value) |
+| Token expiry | 30 minutes (configurable via `ACCESS_TOKEN_EXPIRE_MINUTES`) |
+| Password hashing | bcrypt via `passlib` |
+| Password policy | Minimum 8 characters, requires uppercase, lowercase, and digit |
+| Login rate limiting | 5 attempts per 300 seconds per IP (in-memory; use Redis for multi-process) |
+| CORS | Restricted to configured origins; credentials disabled by default |
+| Secrets management | `.env` files gitignored; `.env.example` contains placeholders only |
+| Token storage | `sessionStorage` in frontend (not `localStorage`) |
+
+## 4. System Architecture
 
 ```mermaid
 flowchart LR
@@ -56,7 +71,7 @@ flowchart LR
 | Redis | Docker network `redis:6379` | Celery broker and result backend. |
 | Celery worker | No public port | Executes AI/content background tasks. |
 
-## 4. Repository Map
+## 5. Repository Map
 
 ### Backend
 
@@ -88,7 +103,7 @@ flowchart LR
 - [frontend/src/types/index.ts](../frontend/src/types/index.ts): TypeScript API models.
 - [frontend/src/__tests__](../frontend/src/__tests__): Jest and Testing Library tests.
 
-## 5. Configuration and Secrets
+## 6. Configuration and Secrets
 
 Copy the example file for local Docker use:
 
@@ -110,10 +125,18 @@ Never commit `backend/.env`. It is ignored by Git. The tracked example must cont
 | `REDIS_HOST` | Yes for worker | `redis` in Docker | Redis hostname. |
 | `REDIS_PORT` | Yes for worker | `6379` | Redis port. |
 | `GROQ_API_KEY` | Required for AI features | Local secret | Groq authentication. |
-| `SECRET_KEY` | Yes | Strong random secret | JWT signing key. Never use `change-me` in production. |
+| `SECRET_KEY` | No (auto-generated) | Leave empty or set a strong random value | JWT signing key. If empty, a random 32+ char key is generated at startup. Never use `change-me` in production. |
 | `ALGORITHM` | Yes | `HS256` | JWT signing algorithm. |
 | `CORS_ORIGINS` | Yes for browser calls | `["http://localhost:3003"]` | Allowed browser origins. |
 | `DEMO_DATA` | Optional | `false` | When `true`, inserts demo products, leads, campaigns, emails, automations, and content. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Optional | `30` | JWT token lifetime in minutes. |
+| `RATE_LIMIT_ENABLED` | Optional | `true` | Enable or disable login rate limiting. |
+| `RATE_LIMIT_LOGIN_ATTEMPTS` | Optional | `5` | Max login attempts before rate limiting. |
+| `RATE_LIMIT_LOGIN_WINDOW_SECONDS` | Optional | `300` | Rate limit window in seconds. |
+| `PASSWORD_MIN_LENGTH` | Optional | `8` | Minimum password length. |
+| `PASSWORD_REQUIRE_UPPERCASE` | Optional | `true` | Require uppercase in passwords. |
+| `PASSWORD_REQUIRE_LOWERCASE` | Optional | `true` | Require lowercase in passwords. |
+| `PASSWORD_REQUIRE_DIGIT` | Optional | `true` | Require digit in passwords. |
 
 ### Frontend variables
 
@@ -142,7 +165,54 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api
 | Twilio or telephony provider | No current key | No calls are made. | Add call request, status webhook, consent, and recording policy. |
 | Search provider | No current key | No search engine lookup. | Add a compliant search API for real lead research. |
 
-## 6. Startup and Operations
+## 7. Developer Onboarding
+
+### What a developer needs
+
+| Requirement | Details |
+|---|---|
+| **Python 3.11+** | Backend runs on Python 3.11. Use `pyenv` or `python3.11` explicitly. |
+| **Node.js 18+** | Frontend requires Node 18+ for Next.js 16. |
+| **Docker & Docker Compose** | Easiest way to run the full stack. |
+| **Groq API key** | Required for all AI features. Get one at [groq.com](https://groq.com). |
+| **Git** | Clone the repository. |
+
+### Quick start
+
+```bash
+# 1. Clone
+git clone https://github.com/AkademiaLimited/AI-Marketing-Akademia.git
+cd AI-Marketing-Akademia
+
+# 2. Set up backend
+cd backend
+cp .env.example .env
+# Edit .env: set GROQ_API_KEY, DB_PASSWORD, and optionally SECRET_KEY
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Set up frontend
+cd ../frontend
+npm install
+# Optionally create .env.local to override NEXT_PUBLIC_API_URL
+
+# 4. Run the full stack (from repo root)
+docker compose up --build
+```
+
+### API keys and secrets summary
+
+| Secret | Where set | Required for | Where documented |
+|---|---|---|---|
+| `GROQ_API_KEY` | `backend/.env` | All AI workflows (research, qualification, content generation) | Section 6 |
+| `DB_PASSWORD` | `backend/.env` | Database access | Section 6 |
+| `SECRET_KEY` | `backend/.env` (optional) | JWT signing. Auto-generated if empty. | Section 6 |
+| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` (optional) | Frontend API endpoint. Defaults to `http://localhost:8000/api`. | Section 6 |
+
+**Important:** Never commit `backend/.env` or `frontend/.env.local`. The tracked `backend/.env.example` must contain placeholders only. Never place real API keys in `.env.example`, frontend code, tests, or documentation.
+
+## 8. Startup and Operations
 
 ### Backend only, with logs visible
 
@@ -199,25 +269,40 @@ Expected:
 {"status":"ok"}
 ```
 
-## 7. Authentication
+## 9. Authentication
 
-Development admin credentials are created by `seed_users()` in [seed.py](../backend/app/core/seed.py):
+### Development admin credentials
+
+Created by `seed_users()` in [seed.py](../backend/app/core/seed.py):
 
 ```text
-
+Email:    admin@akademia.local
+Password: Admin@1234
+```
 
 These are development credentials only. Change the seed strategy and password handling before production.
 
-Login flow:
+### Login flow
 
 1. Frontend sends `POST /api/auth/login` as form data.
-2. Backend verifies the bcrypt password hash.
-3. Backend returns a JWT.
-4. Frontend stores the token in `sessionStorage` under `admin_token`.
-5. Frontend calls `GET /api/auth/me` to verify the user and `is_superuser` flag.
-6. Protected admin pages redirect to `/admin/login` when verification fails.
+2. Backend checks rate limiting (5 attempts per 5 minutes per IP).
+3. Backend verifies the bcrypt password hash.
+4. Backend returns a JWT (30-minute expiry).
+5. Frontend stores the token in `sessionStorage` under `admin_token`.
+6. Frontend calls `GET /api/auth/me` to verify the user and `is_superuser` flag.
+7. Protected admin pages redirect to `/admin/login` when verification fails.
 
-## 8. API Surface
+### Registration
+
+`POST /api/auth/register` accepts email, name, and password. Passwords must meet the policy (min 8 chars, uppercase, lowercase, digit). Registered users are not admins by default.
+
+### Protected routes
+
+All admin routes require a valid JWT and `is_superuser=True`. The dependency chain is:
+- `get_current_user` validates the JWT and loads the user
+- `get_current_admin` additionally checks `is_active` and `is_superuser`
+
+## 10. API Surface
 
 All routes are registered in [main.py](../backend/app/main.py). Most admin routes require a bearer JWT and superuser access.
 
@@ -234,7 +319,7 @@ All routes are registered in [main.py](../backend/app/main.py). Most admin route
 | `/api/workflows` | Workflow and activity audit reads | `GET /runs`, `GET /activities` |
 | `/api/contact` | Public contact form | `POST /` |
 
-## 9. Admin User Workflows
+## 11. Admin User Workflows
 
 ### Create a product and start AI marketing
 
@@ -282,7 +367,7 @@ flowchart LR
 
 Campaigns and automations currently create database records and display them in the admin UI. They do not yet execute a real sequence or scheduled recurring job.
 
-## 10. AI and LangGraph Design
+## 12. AI and LangGraph Design
 
 ### Groq wrapper
 
@@ -312,7 +397,7 @@ Each node records a stage-specific error when it fails:
 
 The implementation protects against local URLs such as `localhost` and `127.0.0.1`, but production SSRF protection should also validate private IP ranges after DNS resolution and enforce response-size/content-type limits.
 
-## 11. Tracking and Auditability
+## 13. Tracking and Auditability
 
 The tracking foundation is in:
 
@@ -348,7 +433,7 @@ The Admin -> Automation page shows recent activity and failure causes.
 
 When real providers are implemented, every provider request should create an activity before the request and update it with the provider result, provider message ID, response status, and error details. Never mark an action `sent` or `published` before the provider confirms success.
 
-## 12. Database and Seed Behavior
+## 14. Database and Seed Behavior
 
 SQLAlchemy models are in [backend/app/models](../backend/app/models). Tables are created by `Base.metadata.create_all()` during local startup. There is currently no production migration workflow in the repository; schema evolution should move to Alembic migrations before production deployment.
 
@@ -362,7 +447,7 @@ docker compose up --build backend
 
 The `-v` option is destructive and should never be used against production data.
 
-## 13. Testing and Quality Gates
+## 15. Testing and Quality Gates
 
 ### Backend
 
@@ -375,6 +460,10 @@ The backend tests cover:
 
 - API contracts
 - Auth and local development email serialization
+- Password policy enforcement (min length, uppercase, lowercase, digit)
+- Login rate limiting (blocks after max attempts, window behavior)
+- Secret key strength (not default, random, sufficient length)
+- Password hashing and verification
 - Lead discovery
 - Content generation and channel selection
 - LangGraph website research
@@ -395,7 +484,7 @@ Frontend tests cover public pages, admin pages, login, products, emails, leads, 
 
 The test suites may show dependency deprecation warnings from pytest-asyncio, Starlette, Passlib, or LangGraph. These warnings do not currently fail the suites. The Next.js build may warn about multiple lockfiles and workspace-root inference; clean that up before CI/CD standardization.
 
-## 14. External Integration Roadmap
+## 16. External Integration Roadmap
 
 The safe order for real automation is:
 
