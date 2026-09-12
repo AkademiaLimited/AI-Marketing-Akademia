@@ -358,7 +358,7 @@ async def seed_campaigns(db: AsyncSession) -> None:
 
 async def seed_users(db: AsyncSession) -> None:
     admin_email = "admin@akademia.local"
-    admin_password = "admin123"
+    admin_password = "Admin@1234"
     result = await db.execute(select(User).where(User.id == admin_email))
     if not result.scalar_one_or_none():
         db.add(

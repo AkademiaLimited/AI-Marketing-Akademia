@@ -124,11 +124,11 @@ export default function ContactPage() {
               <h3>Other ways to reach us</h3>
               <div className="ci-row">
                 <div className="lab">Email</div>
-                <div>hello@aimarketer.com</div>
+                <div>gen@akademia.co.jp</div>
               </div>
               <div className="ci-row">
                 <div className="lab">Phone</div>
-                <div>+256 700 000 000</div>
+                <div>+81 90-57563969</div>
               </div>
               <div className="ci-row">
                 <div className="lab">Hours</div>

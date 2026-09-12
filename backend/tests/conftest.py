@@ -3,6 +3,7 @@ import os
 os.environ.setdefault("DB_USER", "test")
 os.environ.setdefault("DB_PASSWORD", "test")
 os.environ.setdefault("DB_NAME", "test_db")
+os.environ.setdefault("SECRET_KEY", "")  # Force random generation in tests
 
 from collections.abc import AsyncGenerator
 

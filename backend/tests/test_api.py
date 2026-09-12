@@ -260,7 +260,7 @@ async def test_auth_register_and_login(client: AsyncClient):
     payload = {
         "email": "admin@example.com",
         "name": "Admin User",
-        "password": "strongpass",
+        "password": "StrongPass1",
     }
     response = await client.post("/api/auth/register", json=payload)
     assert response.status_code == 201
@@ -268,7 +268,7 @@ async def test_auth_register_and_login(client: AsyncClient):
     assert data["email"] == "admin@example.com"
     assert "id" in data
 
-    response = await client.post("/api/auth/login", data={"username": "admin@example.com", "password": "strongpass"})
+    response = await client.post("/api/auth/login", data={"username": "admin@example.com", "password": "StrongPass1"})
     assert response.status_code == 200
     token = response.json()
     assert token["token_type"] == "bearer"

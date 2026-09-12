@@ -1,11 +1,18 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import create_access_token, decode_token, hash_password, verify_password
+from app.core.auth import (
+    check_login_rate_limit,
+    create_access_token,
+    decode_token,
+    hash_password,
+    verify_password,
+    validate_password,
+)
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
@@ -41,9 +48,15 @@ async def read_current_user(current_user: User = Depends(get_current_user)):
 
 @router.post("/register", response_model=UserOut, status_code=201)
 async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
+    try:
+        validate_password(payload.password)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
     result = await db.execute(select(User).where(User.email == payload.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
+
     user = User(
         id=payload.email,
         email=payload.email,
@@ -57,7 +70,12 @@ async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-async def login(form: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+async def login(
+    request: Request,
+    form: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(check_login_rate_limit),
+):
     result = await db.execute(select(User).where(User.email == form.username))
     user = result.scalar_one_or_none()
     if not user or not verify_password(form.password, user.hashed_password):
