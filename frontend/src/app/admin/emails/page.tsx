@@ -19,6 +19,8 @@ export default function EmailsPage() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ lead_name: "", product_name: "", subject: "", body: "" });
 
   useEffect(() => {
     if (!token) return;
@@ -29,8 +31,18 @@ export default function EmailsPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">Emails</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-slate-900">Emails</h1>
+        <button type="button" onClick={() => setShowForm((value) => !value)} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white">{showForm ? "Close" : "Create draft"}</button>
+      </div>
       {reviewError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{reviewError}</p>}
+      {showForm && (
+        <form onSubmit={createDraft} className="grid gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          {(["lead_name", "product_name", "subject"] as const).map((field) => <label key={field} className="text-sm font-medium text-slate-700">{field.replace("_", " ")}<input required value={form[field]} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" /></label>)}
+          <label className="text-sm font-medium text-slate-700">Body<textarea required value={form.body} onChange={(event) => setForm({ ...form, body: event.target.value })} className="mt-1 min-h-32 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" /></label>
+          <button type="submit" className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white">Save draft</button>
+        </form>
+      )}
 
       {emails.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 bg-white p-12 text-center">
@@ -103,6 +115,20 @@ export default function EmailsPage() {
       setReviewError(error instanceof Error ? error.message : "Could not review email");
     } finally {
       setReviewingId(null);
+    }
+  }
+
+  async function createDraft(event: React.FormEvent) {
+    event.preventDefault();
+    if (!token) return;
+    setReviewError(null);
+    try {
+      const created = await apiFetchWithAuth<Email>("/emails/", token, { method: "POST", body: JSON.stringify({ ...form, id: crypto.randomUUID(), status: "draft" }) });
+      setEmails((current) => [...current, created]);
+      setForm({ lead_name: "", product_name: "", subject: "", body: "" });
+      setShowForm(false);
+    } catch (error) {
+      setReviewError(error instanceof Error ? error.message : "Could not create email draft");
     }
   }
 }

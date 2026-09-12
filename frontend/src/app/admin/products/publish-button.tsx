@@ -44,6 +44,17 @@ export default function PublishButton({
     );
   }
 
+  if (status === "error") {
+    return (
+      <div>
+        <button onClick={handlePublish} className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
+          Retry publishing
+        </button>
+        <p role="alert" className="mt-1 text-xs text-red-700">Publishing failed. Check the backend logs.</p>
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={handlePublish}

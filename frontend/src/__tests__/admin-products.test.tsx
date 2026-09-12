@@ -120,7 +120,7 @@ describe('AdminProducts', () => {
   });
 
   it('triggers publish when Publish button is clicked', async () => {
-    (apiFetchWithAuth as jest.Mock).mockResolvedValue([
+    (apiFetchWithAuth as jest.Mock).mockResolvedValueOnce([
       {
         id: 'prod-4',
         name: 'AI Recruiter',
@@ -140,8 +140,7 @@ describe('AdminProducts', () => {
       },
     ]);
 
-    const fetchMock = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
-    window.fetch = fetchMock as any;
+    (apiFetchWithAuth as jest.Mock).mockResolvedValue({});
 
     render(<ProductsPage />);
 
@@ -149,8 +148,9 @@ describe('AdminProducts', () => {
     fireEvent.click(publishButton);
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining('/products/recruiter/publish'),
+      expect(apiFetchWithAuth).toHaveBeenCalledWith(
+        '/products/recruiter/publish',
+        'mock-token',
         expect.objectContaining({ method: 'POST' })
       );
     });

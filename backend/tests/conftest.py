@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base
+from app.models.user import User
 from app.main import app
 
 
@@ -41,11 +42,23 @@ async def db_session(db_engine) -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture
 async def client(db_session: AsyncSession):
     from app.core.database import get_db
+    from app.api.routers.auth import get_current_admin
 
     async def override_get_db():
         yield db_session
 
+    async def override_get_current_admin():
+        return User(
+            id="test-admin",
+            email="admin@example.com",
+            name="Test Admin",
+            hashed_password="test-hash",
+            is_active=True,
+            is_superuser=True,
+        )
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_admin] = override_get_current_admin
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac

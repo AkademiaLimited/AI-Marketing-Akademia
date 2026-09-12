@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     redis_port: int = 6379
 
     groq_api_key: str = ""
+    demo_data: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import type { LeadStatus } from "@/types";
 import { apiFetchWithAuth } from "@/lib/api";
 
@@ -34,9 +35,11 @@ export default function LeadStatusForm({
   token: string | null;
 }) {
   const router = useRouter();
+  const [error, setError] = useState("");
 
   async function handleChange(formData: FormData) {
     const newStatus = formData.get("status") as LeadStatus;
+    setError("");
     try {
       await apiFetchWithAuth(`/leads/${leadId}/status`, token, {
         method: "PATCH",
@@ -44,13 +47,12 @@ export default function LeadStatusForm({
       });
       router.refresh();
     } catch (err) {
-      console.error(err);
-      alert("Failed to update status");
+      setError(err instanceof Error ? err.message : "Failed to update status");
     }
   }
 
   return (
-    <form action={handleChange} className="flex items-center gap-3">
+    <form action={handleChange} className="flex flex-wrap items-center gap-3">
       <label className="text-sm text-slate-500">Update Status</label>
       <select
         name="status"
@@ -69,6 +71,7 @@ export default function LeadStatusForm({
       >
         Save
       </button>
+      {error && <p role="alert" className="basis-full text-xs text-red-700">{error}</p>}
     </form>
   );
 }

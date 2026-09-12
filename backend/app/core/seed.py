@@ -259,6 +259,8 @@ async def seed_products(db: AsyncSession) -> None:
         existing = result.scalar_one_or_none()
         if existing:
             for key, value in product_data.items():
+                if key == "id":
+                    continue
                 setattr(existing, key, value)
         else:
             product = Product(**product_data)

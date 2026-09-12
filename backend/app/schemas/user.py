@@ -14,6 +14,7 @@ class UserCreate(UserBase):
 
 class UserOut(UserBase):
     model_config = ConfigDict(from_attributes=True)
+    email: str
     id: str
     is_active: bool
     is_superuser: bool

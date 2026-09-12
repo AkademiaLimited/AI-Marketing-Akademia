@@ -17,6 +17,9 @@ export default function AutomationPage() {
   const { token } = useAuth();
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [activities, setActivities] = useState<MarketingActivity[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [form, setForm] = useState({ name: "", status: "stopped" });
 
   useEffect(() => {
     if (!token) return;
@@ -30,7 +33,18 @@ export default function AutomationPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">Automation</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-slate-900">Automation</h1>
+        <button type="button" onClick={() => setShowForm((value) => !value)} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white">{showForm ? "Close" : "Create automation"}</button>
+      </div>
+      {showForm && (
+        <form onSubmit={createAutomation} className="grid gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2">
+          <label className="text-sm font-medium text-slate-700">Name<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" /></label>
+          <label className="text-sm font-medium text-slate-700">Initial status<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal"><option value="stopped">Stopped</option><option value="running">Running</option><option value="paused">Paused</option></select></label>
+          {formError && <p role="alert" className="text-sm text-red-700 md:col-span-2">{formError}</p>}
+          <button type="submit" className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white md:col-span-2">Save automation</button>
+        </form>
+      )}
 
       {automations.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 bg-white p-12 text-center">
@@ -92,4 +106,17 @@ export default function AutomationPage() {
       </div>
     </section>
   );
+
+  async function createAutomation(event: React.FormEvent) {
+    event.preventDefault();
+    if (!token) return;
+    setFormError("");
+    try {
+      const created = await apiFetchWithAuth<Automation>("/automations/", token, { method: "POST", body: JSON.stringify({ ...form, id: crypto.randomUUID(), last_run: "", result: "" }) });
+      setAutomations((current) => [...current, created]);
+      setShowForm(false);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Could not create automation");
+    }
+  }
 }
