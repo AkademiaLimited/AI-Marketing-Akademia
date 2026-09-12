@@ -5,9 +5,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.api.routers.auth import get_current_admin
 from app.models.lead import Lead
+from app.services.research import research_lead_and_draft_email
 from app.schemas.lead import LeadCreate, LeadOut
 
 router = APIRouter()
+
+
+@router.post("/{lead_id}/research-email")
+async def research_email_draft(
+    lead_id: str,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    try:
+        return await research_lead_and_draft_email(db, lead_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail="Website research failed") from exc
 
 
 @router.get("/", response_model=list[LeadOut])

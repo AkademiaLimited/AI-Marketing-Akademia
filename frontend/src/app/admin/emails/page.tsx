@@ -17,6 +17,8 @@ const statusStyles: Record<string, string> = {
 export default function EmailsPage() {
   const { token } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -28,6 +30,7 @@ export default function EmailsPage() {
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-900">Emails</h1>
+      {reviewError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{reviewError}</p>}
 
       {emails.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 bg-white p-12 text-center">
@@ -42,6 +45,7 @@ export default function EmailsPage() {
                 <th className="px-4 py-3 text-left font-medium">Subject</th>
                 <th className="px-4 py-3 text-left font-medium">Product</th>
                 <th className="px-4 py-3 text-left font-medium">Status</th>
+                <th className="px-4 py-3 text-left font-medium">Review</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -55,6 +59,30 @@ export default function EmailsPage() {
                       {email.status}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    {email.status === "draft" ? (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          disabled={reviewingId === email.id}
+                          className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                          onClick={() => reviewEmail(email.id, "approve")}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          disabled={reviewingId === email.id}
+                          className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:opacity-50"
+                          onClick={() => reviewEmail(email.id, "reject")}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">Reviewed</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -63,4 +91,18 @@ export default function EmailsPage() {
       )}
     </section>
   );
+
+  async function reviewEmail(emailId: string, decision: "approve" | "reject") {
+    if (!token) return;
+    setReviewingId(emailId);
+    setReviewError(null);
+    try {
+      const updated = await apiFetchWithAuth<Email>(`/emails/${emailId}/${decision}`, token, { method: "POST" });
+      setEmails((current) => current.map((email) => email.id === updated.id ? updated : email));
+    } catch (error) {
+      setReviewError(error instanceof Error ? error.message : "Could not review email");
+    } finally {
+      setReviewingId(null);
+    }
+  }
 }

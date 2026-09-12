@@ -72,6 +72,21 @@ export interface Automation {
   result: string;
 }
 
+export interface MarketingActivity {
+  id: string;
+  workflow_run_id: string;
+  lead_id: string;
+  email_id: string;
+  activity_type: string;
+  channel: string;
+  source_url: string;
+  status: string;
+  provider_message_id: string;
+  details: string;
+  error: string;
+  created_at: string;
+}
+
 export interface Content {
   id: string;
   type: string;

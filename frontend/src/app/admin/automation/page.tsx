@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { apiFetchWithAuth } from "@/lib/api";
-import type { Automation } from "@/types";
+import type { Automation, MarketingActivity } from "@/types";
 import { useAuth } from "../_components/auth-context";
 
 const statusStyles: Record<string, string> = {
@@ -16,11 +16,15 @@ const statusStyles: Record<string, string> = {
 export default function AutomationPage() {
   const { token } = useAuth();
   const [automations, setAutomations] = useState<Automation[]>([]);
+  const [activities, setActivities] = useState<MarketingActivity[]>([]);
 
   useEffect(() => {
     if (!token) return;
     apiFetchWithAuth<Automation[]>("/automations", token)
       .then(setAutomations)
+      .catch(() => {});
+    apiFetchWithAuth<MarketingActivity[]>("/workflows/activities", token)
+      .then(setActivities)
       .catch(() => {});
   }, [token]);
 
@@ -60,6 +64,32 @@ export default function AutomationPage() {
           </table>
         </div>
       )}
+      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-100 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-900">Recent activity</h2>
+          <p className="mt-1 text-sm text-slate-500">A record of research, AI decisions, drafts, and failures.</p>
+        </div>
+        {activities.length === 0 ? (
+          <p className="p-6 text-sm text-slate-500">No workflow activity recorded yet.</p>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {activities.map((activity) => (
+              <div key={activity.id} className="grid gap-2 px-6 py-4 md:grid-cols-[180px_1fr_auto] md:items-start">
+                <div className="text-xs text-slate-500">{activity.created_at}</div>
+                <div>
+                  <div className="font-medium text-slate-900">{activity.activity_type.replaceAll("_", " ")}</div>
+                  <div className="text-sm text-slate-600">{activity.details || "No details recorded."}</div>
+                  {activity.source_url && <div className="mt-1 truncate text-xs text-slate-400">Source: {activity.source_url}</div>}
+                  {activity.error && <div className="mt-1 text-sm text-red-700">Cause: {activity.error}</div>}
+                </div>
+                <span className={`inline-flex w-fit rounded-full px-2 py-1 text-xs font-medium ${activity.status === "failed" ? "bg-red-100 text-red-800" : "bg-slate-100 text-slate-700"}`}>
+                  {activity.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

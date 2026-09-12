@@ -23,15 +23,18 @@ describe('AdminAutomation', () => {
   });
 
   it('renders automation table with data', async () => {
-    (apiFetchWithAuth as jest.Mock).mockResolvedValue([
-      {
-        id: 'A1',
-        name: 'Lead Discovery',
-        status: 'running',
-        last_run: '12 min ago',
-        result: 'Found 6 new leads',
-      },
-    ]);
+    (apiFetchWithAuth as jest.Mock).mockImplementation((path: string) => {
+      if (path === '/workflows/activities') return Promise.resolve([]);
+      return Promise.resolve([
+        {
+          id: 'A1',
+          name: 'Lead Discovery',
+          status: 'running',
+          last_run: '12 min ago',
+          result: 'Found 6 new leads',
+        },
+      ]);
+    });
 
     render(<AutomationPage />);
     await waitFor(() => {
@@ -39,6 +42,7 @@ describe('AdminAutomation', () => {
     });
     expect(screen.getByText('running')).toBeInTheDocument();
     expect(screen.getByText('Found 6 new leads')).toBeInTheDocument();
+    expect(apiFetchWithAuth).toHaveBeenCalledWith('/workflows/activities', 'mock-token');
   });
 
   it('shows empty state when no automations', async () => {
