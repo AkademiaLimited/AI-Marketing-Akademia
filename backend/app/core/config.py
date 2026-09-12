@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     db_host: str = "db"
     db_port: int = 5432
 
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3003"]
 
     secret_key: str = "change-me"
     algorithm: str = "HS256"

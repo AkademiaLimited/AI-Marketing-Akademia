@@ -1,42 +1,43 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: akademia_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5433:5432"
+      POSTGRES_USER: ${DB_USER:-akademia}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: ${DB_NAME:-akademia_db}
     volumes:
       - db_data:/var/lib/postgresql/data
     networks: [ akademia_net ]
 
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    depends_on: [ db, redis ]
+    networks: [ akademia_net ]
+
   frontend:
     build: ./frontend
-    container_name: akademia_frontend
     restart: unless-stopped
-    depends_on: [ db ]
+    depends_on: [ backend ]
     ports:
       - "3003:3003"
     networks: [ akademia_net ]
 
   redis:
     image: redis:7-alpine
-    container_name: akademia_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     networks: [ akademia_net ]
     volumes:
       - redis_data:/data
 
   worker:
     build: ./backend
-    container_name: akademia_worker
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     command: celery -A app.core.celery_app:celery_app worker --loglevel=info
     depends_on: [ db, redis ]
     networks: [ akademia_net ]

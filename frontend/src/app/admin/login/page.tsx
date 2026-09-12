@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../_components/auth-context";
@@ -18,40 +19,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Admin login</h1>
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
+    <main className="admin-login-page">
+      <section className="admin-login-brand" aria-label="AI Marketer admin">
+        <Link href="/" className="admin-login-logo">
+          <span className="admin-login-mark">AM</span>
+          <span>AI Marketer</span>
+        </Link>
+        <div className="admin-login-intro">
+          <p className="admin-login-eyebrow">Operations workspace</p>
+          <h1>Turn attention into momentum.</h1>
+          <p>Manage your leads, campaigns, emails and content from one calm, focused workspace.</p>
+        </div>
+        <div className="admin-login-status"><span /> Systems ready for your next move</div>
+      </section>
+
+      <section className="admin-login-panel">
+        <Link href="/" className="admin-login-back">← Back to AI Marketer</Link>
+        <form onSubmit={handleSubmit} className="admin-login-form">
+          <div className="admin-login-heading">
+            <p className="admin-login-eyebrow">Admin access</p>
+            <h2>Admin login</h2>
+            <p>Welcome back. Sign in to continue to your workspace.</p>
+          </div>
+          <div className="admin-login-field">
+            <label htmlFor="email">Email address</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
             required
           />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+          </div>
+          <div className="admin-login-field">
+            <label htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
             required
           />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+          </div>
+          {error && <p className="admin-login-error" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="admin-login-submit"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
-      </form>
-    </div>
+        </form>
+        <p className="admin-login-note">Protected workspace for authorised team members.</p>
+      </section>
+    </main>
   );
 }

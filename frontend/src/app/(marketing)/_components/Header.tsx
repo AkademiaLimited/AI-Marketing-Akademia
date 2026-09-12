@@ -40,6 +40,7 @@ export function Header() {
           <NavLinks onNavigate={closeMobile} />
         </nav>
         <div className="hd-right">
+          <Link href="/admin/login" className="btn btn-secondary">Admin login</Link>
           <Link href="/contact" className="btn btn-secondary" style={{ borderColor: 'transparent' }}>Contact sales</Link>
           <Link href="/products" className="btn btn-primary">Get started free</Link>
           <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
@@ -53,6 +54,7 @@ export function Header() {
       </div>
       <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`}>
         <NavLinks onNavigate={closeMobile} />
+        <Link href="/admin/login" className="btn btn-secondary" onClick={closeMobile}>Admin login</Link>
         <Link href="/contact" className="btn btn-secondary" style={{ borderColor: 'transparent' }}>Contact sales</Link>
         <Link href="/products" className="btn btn-primary">Get started free</Link>
       </div>
