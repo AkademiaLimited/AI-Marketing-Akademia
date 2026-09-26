@@ -279,10 +279,12 @@ Without `GROQ_API_KEY`, all AI features return errors. The app will still functi
 
 The system uses **Groq** as the LLM provider with model `openai/gpt-oss-120b`. Two functions:
 
-- **`call_groq(prompt, system_prompt, model, temperature, max_tokens)`** — Returns raw text completion
-- **`call_groq_json(prompt, system_prompt, model, temperature, max_tokens)`** — Returns parsed JSON (uses `response_format={"type": "json_object"}`)
+- **`call_groq(prompt, system_prompt, brand_context=None, model, temperature, max_tokens)`** — Returns raw text completion. `brand_context` is prepended to `system_prompt` when provided.
+- **`call_groq_json(prompt, system_prompt, brand_context=None, model, temperature, max_tokens)`** — Returns parsed JSON (uses `response_format={"type": "json_object"}`). `brand_context` is prepended to `system_prompt` when provided.
 
 The client is a singleton — `get_client()` lazily creates one `AsyncGroq` instance.
+
+**Brand context injection:** When a `user_id` is available, `get_brand_context()` fetches the user's active `BrandProfile` and builds a formatted context string (voice, colors, fonts, tone keywords). This context is passed as `brand_context` to every `call_groq`/`call_groq_json` call, ensuring all AI-generated content stays on-brand.
 
 ### 7.2 AI Lead Discovery (Celery Task)
 **File:** `backend/app/tasks/automation.py`
