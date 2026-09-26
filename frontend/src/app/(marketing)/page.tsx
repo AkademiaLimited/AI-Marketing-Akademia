@@ -17,7 +17,7 @@ export default async function HomePage() {
     <>
       <section className="hero hero-left">
         <div className="wrap">
-          <h1>Four practical AI products. One place to find the right one.</h1>
+           <h1>Six practical AI products. One place to find the right one.</h1>
           <div className="hero-cta">
             <Link href="/products" className="btn btn-primary btn-lg">Get started free</Link>
             <Link href="/contact" className="btn btn-secondary btn-lg">Book a demo</Link>
@@ -40,8 +40,8 @@ export default async function HomePage() {
           <div className="why-grid">
             <div className="why-item">
               <div className="num">01</div>
-              <h3>Four products, one place to start</h3>
-              <p>You don&apos;t need to evaluate ten different AI vendors. We represent four practical tools and can point you to the one that actually fits.</p>
+              <h3>Six products, one place to start</h3>
+              <p>You don&apos;t need to evaluate ten different AI vendors. We represent six practical tools and can point you to the one that actually fits.</p>
             </div>
             <div className="why-item">
               <div className="num">02</div>

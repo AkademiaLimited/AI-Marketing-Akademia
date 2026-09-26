@@ -12,16 +12,18 @@ describe('HomePage', () => {
   it('renders hero heading', async () => {
     apiFetch.mockResolvedValue([]);
     render(await HomePage());
-    expect(screen.getByText(/Four practical AI products/i)).toBeInTheDocument();
+    expect(screen.getByText(/Six practical AI products/i)).toBeInTheDocument();
   });
 
-  it('renders product dock with four products', async () => {
+  it('renders product dock with all six products', async () => {
     apiFetch.mockResolvedValue([]);
     render(await HomePage());
-    expect(screen.getByText('AI Pod')).toBeInTheDocument();
-    expect(screen.getByText('AI Recruiter')).toBeInTheDocument();
-    expect(screen.getByText('AI Dojo')).toBeInTheDocument();
-    expect(screen.getByText('AI World')).toBeInTheDocument();
+    expect(screen.getByText('AI AVATAR AKADEMIA')).toBeInTheDocument();
+    expect(screen.getByText('AIPOD')).toBeInTheDocument();
+    expect(screen.getByText('VIRTUAL WORLD')).toBeInTheDocument();
+    expect(screen.getByText('UgaJapa Translation')).toBeInTheDocument();
+    expect(screen.getByText('AI DOJO')).toBeInTheDocument();
+    expect(screen.getByText('AI RECRUITER')).toBeInTheDocument();
   });
 
   it('renders product cards when products are published', async () => {
@@ -29,19 +31,19 @@ describe('HomePage', () => {
       {
         id: '1',
         slug: 'pod',
-        name: 'AI Pod',
+        name: 'AIPOD',
         published: true,
         problem: 'Scaling outreach',
         target: 'Growth teams',
-        description: 'AI Pod helps teams manage tasks and reporting in one place.',
+        description: 'AIPOD helps teams manage tasks and reporting in one place.',
         features: ['A'],
         benefits: ['B'],
       },
     ]);
     render(await HomePage());
-    const podElements = screen.getAllByText('AI Pod');
+    const podElements = screen.getAllByText('AIPOD');
     expect(podElements.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('AI Pod helps teams manage tasks and reporting in one place.')).toBeInTheDocument();
+    expect(screen.getByText('AIPOD helps teams manage tasks and reporting in one place.')).toBeInTheDocument();
   });
 
   it('shows empty state when no published products', async () => {

@@ -19,7 +19,7 @@ export default async function ProductsOverviewPage() {
     <>
       <section className="hero hero-left" style={{ paddingBottom: 0 }}>
         <div className="wrap">
-          <h1>One company, four practical AI tools.</h1>
+           <h1>Six practical AI tools. From one team.</h1>
         </div>
       </section>
 

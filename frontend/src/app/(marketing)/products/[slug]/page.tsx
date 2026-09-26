@@ -26,7 +26,9 @@ export default async function ProductDetailPage({
   const dark = m?.dark || '#000000';
   const visual = m?.visual;
   const gallery = m?.gallery;
-  const showGallery = ['dojo', 'world'].includes(product.slug);
+  const imageUrl = m?.image_url || product.image_url;
+  const websiteUrl = m?.website_url || product.website_url;
+  const showGallery = ['dojo', 'world', 'avatar', 'translation'].includes(product.slug);
 
   return (
     <>
@@ -34,10 +36,13 @@ export default async function ProductDetailPage({
         <div className="wrap">
           <div className="pd-hero-grid">
             <div>
-              <h1>{product.name}</h1>
-              <p className="pd-tagline">{product.description}</p>
-              <p className="pd-desc">{product.problem}</p>
-              <div className="hero-cta">
+           <h1>{product.name}</h1>
+               <p className="pd-tagline">{product.description}</p>
+               <p className="pd-desc">{product.problem}</p>
+               {websiteUrl && (
+                 <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="learn">Visit product site →</a>
+               )}
+               <div className="hero-cta">
                 <Link href="/contact" className="btn btn-primary btn-lg">Get started free</Link>
                 <Link href="/contact" className="btn btn-secondary btn-lg">Book a demo</Link>
               </div>
@@ -46,6 +51,11 @@ export default async function ProductDetailPage({
               {visual}
             </div>
           </div>
+          {imageUrl && (
+            <div className="mt-8">
+              <img src={imageUrl} alt={product.name} className="w-full rounded-lg" loading="lazy" />
+            </div>
+          )}
         </div>
       </section>
 
