@@ -12,6 +12,16 @@ function ContactForm() {
   const [product, setProduct] = useState(() => preset || "General Enquiry");
   const [submitting, setSubmitting] = useState(false);
 
+  const PRODUCT_SLUG_MAP: Record<string, string> = {
+    "AI Avatar Akademia": "avatar",
+    "Virtual World": "world",
+    "AIPOD": "pod",
+    "UgaJapa": "translation",
+    "AI DOJO": "dojo",
+    "AI Recruiter": "recruiter",
+    "General Enquiry": "",
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -24,7 +34,7 @@ function ContactForm() {
       email: data.get("email") as string,
       company: data.get("company") as string,
       message: data.get("message") as string,
-      product_slug: product === "General Enquiry" ? undefined : product.toLowerCase().replace("ai ", ""),
+      product_slug: PRODUCT_SLUG_MAP[product] || undefined,
     };
 
     try {
@@ -84,7 +94,7 @@ function ContactForm() {
           <div className="field">
             <label htmlFor="product">Product</label>
             <select id="product" value={product} onChange={(e) => setProduct(e.target.value)} name="product">
-              {['AI Pod', 'AI Recruiter', 'AI Dojo', 'AI World', 'General Enquiry'].map(o => (
+              {['AI Avatar Akademia', 'Virtual World', 'AIPOD', 'UgaJapa', 'AI DOJO', 'AI Recruiter', 'General Enquiry'].map(o => (
                 <option key={o} value={o}>{o}</option>
               ))}
             </select>
@@ -124,19 +134,23 @@ export default function ContactPage() {
               <h3>Other ways to reach us</h3>
               <div className="ci-row">
                 <div className="lab">Email</div>
-                <div>gen@akademia.co.jp</div>
+                <div>ai-pod@akademia.sakura.ne.jp</div>
               </div>
               <div className="ci-row">
                 <div className="lab">Phone</div>
-                <div>+81 90-57563969</div>
+                <div>+81 90-5756-3969</div>
               </div>
               <div className="ci-row">
                 <div className="lab">Hours</div>
                 <div>Mon–Fri, 9:00–17:00 EAT</div>
               </div>
               <div className="ci-row">
+                <div className="lab">Address</div>
+                <div>Plot 2133, Tank Hill Road, Muyenga, Kampala, Uganda</div>
+              </div>
+              <div className="ci-row">
                 <div className="lab">Products</div>
-                <div>AI Pod · AI Recruiter · AI Dojo · AI World</div>
+                <div>AI Avatar Akademia · Virtual World · AIPOD · UgaJapa · AI DOJO · AI Recruiter</div>
               </div>
             </div>
           </div>

@@ -20,33 +20,111 @@ from app.core.auth import hash_password
 PRODUCTS = [
     {
         "id": str(uuid.uuid4()),
-        "name": "AI Pod",
+        "name": "AI AVATAR AKADEMIA",
+        "slug": "avatar",
+        "published": True,
+        "problem": "Remote communication lacks human presence — avatars, interpreters, and meeting tools feel robotic and disconnected.",
+        "target": "Best for: Enterprises and educators who need lifelike 3D avatars for interviews, training, translation, and virtual meetings.",
+        "description": "A 3D AI avatar platform bridging Japan and Uganda. Talk to lifelike avatar guides for culture, business etiquette, and Luganda phrases, run live video meetings with real-time speech translation and lip-synced avatar interpreters, or launch an AI-powered interview and recruiter mode — all with your own custom-built avatar characters.",
+        "features": ["3D avatar guides", "Real-time speech translation", "Lip-synced avatars", "AI interviewer mode", "Custom avatar characters"],
+        "benefits": ["Reduce staffing costs for 24/7 interaction", "Consistent quality for every user", "Multi-language support without hiring", "Full session logging and compliance-ready records"],
+        "capabilities": [
+            {"icon": "avatar", "title": "AI Candidate Interviewer", "body": "Automate round-one technical and behavioral screening with a voice agent that asks follow-ups, evaluates competence, and generates an assessment report."},
+            {"icon": "translate", "title": "Meeting translation", "body": "Real-time conversation translation for cross-language meetings and collaboration."},
+            {"icon": "chat", "title": "AI Medical Assistant", "body": "Handles patient intake, caregiver support, and consultation routing, with multi-language translation and secure record storage."},
+        ],
+        "category": "ai-avatars",
+        "price": "Custom",
+        "image_url": "https://ai-pod.net/images/image%20copy%2017.png",
+    },
+    {
+        "id": str(uuid.uuid4()),
+        "name": "VIRTUAL WORLD",
+        "slug": "world",
+        "published": True,
+        "problem": "Remote work feels isolating — scheduled video calls and chat tabs fragment collaboration and kill spontaneity.",
+        "target": "Best for: Distributed teams and event organizers who want spontaneous, in-person-like collaboration in a virtual space.",
+        "description": "A persistent virtual office and event space built on the WorkAdventure engine. Teams and attendees move around as characters in a 2D map, bumping into colleagues, joining spontaneous video calls, and collaborating the way they would in a real shared space — no scheduled meeting links required.",
+        "features": ["Persistent virtual office", "2D character navigation", "Spontaneous video calls", "WorkAdventure engine", "No scheduled meeting links"],
+        "benefits": ["Recreate spontaneous office interactions", "Reduce meeting overload", "Natural proximity-based communication", "Immersive team presence"],
+        "capabilities": [
+            {"icon": "world", "title": "Virtual office", "body": "A persistent space where teams work and meet as avatars on a 2D map."},
+            {"icon": "map", "title": "Event spaces", "body": "Host conferences, meetups, and workshops with spatial audio and proximity chat."},
+            {"icon": "chat", "title": "Seamless collaboration", "body": "Bump into colleagues to start conversations — no calendar invites needed."},
+        ],
+        "category": "virtual-worlds",
+        "price": "$99/mo",
+        "image_url": "https://ai-pod.net/images/image%20copy%2018.png",
+    },
+    {
+        "id": str(uuid.uuid4()),
+        "name": "AIPOD",
         "slug": "pod",
         "published": True,
         "problem": "Work is scattered across tools and pulling together an honest picture of progress takes hours every week.",
         "target": "Best for: Teams and departments who need one shared view of what's being worked on, without chasing status updates.",
-        "description": "A task management and reporting system with AI built in.",
-        "features": [],
-        "benefits": [],
+        "description": "An AI-powered daily reporting dashboard. Teams log in to submit and review structured daily reports, with account registration and secure sign-in built for organizations that need a consistent, automated pulse on daily work.",
+        "features": ["Daily reporting dashboard", "Team status boards", "Auto-generated reports", "AI chat queries", "Secure sign-in"],
+        "benefits": ["Eliminate manual status compilation", "Shared real-time view of all work", "Instant AI-powered insights", "Enterprise-grade security"],
         "capabilities": [
             {"icon": "pod", "title": "Task management", "body": "Shared boards keep every task, owner and deadline visible in one place."},
             {"icon": "report", "title": "Reporting", "body": "Progress is turned into clear reports automatically, no manual compiling."},
-            {"icon": "chat", "title": "AI chat", "body": "Ask AI Pod a direct question about your team's work and get a plain answer."},
+            {"icon": "chat", "title": "AI chat", "body": "Ask AIPOD a direct question about your team's work and get a plain answer."},
         ],
         "category": "business",
         "price": "Custom",
-        "image_url": "",
+        "image_url": "https://ai-pod.net/images/image%20copy%2019.png",
     },
     {
         "id": str(uuid.uuid4()),
-        "name": "AI Recruiter",
+        "name": "UgaJapa Translation",
+        "slug": "translation",
+        "published": True,
+        "problem": "Teams lose nuance and speed when translating across languages — especially African and Asian language pairs that standard APIs struggle with.",
+        "target": "Best for: Global teams using Mattermost who need accurate, affordable, and resilient translation with billing transparency.",
+        "description": "A global translation API and dashboard purpose-built for Mattermost plugins, combining a neural translation engine, a voice engine for speech-to-text and subtitles, a 197-language global engine, text-to-speech, and a resilient always-on fallback bot — with per-user API keys, quality scoring, and usage-based billing.",
+        "features": ["197-language support", "Neural translation engine", "Speech-to-text & subtitles", "Text-to-speech", "Per-user API keys", "Quality scoring", "Usage-based billing"],
+        "benefits": ["Optimized for African & Asian languages", "Always-on fallback for reliability", "Transparent usage-based pricing", "Enterprise-grade quality metadata"],
+        "capabilities": [
+            {"icon": "globe", "title": "UgaJapa Neural Engine", "body": "AI-powered translation optimised for African languages, Japanese, and complex language pairs."},
+            {"icon": "voice", "title": "UgaJapa Voice Engine", "body": "Speech-to-text for voice messages, audio files, and video subtitle generation."},
+            {"icon": "world", "title": "UgaJapa Global Engine", "body": "Worldwide text translation across 197 languages with enterprise-grade quality."},
+            {"icon": "bot", "title": "UgaJapa Bot", "body": "Resilient on-platform fallback engine — always available, no external dependency."},
+        ],
+        "category": "translation",
+        "price": "$49/mo",
+        "image_url": "https://ai-pod.net/images/image%20copy%2020.png",
+    },
+    {
+        "id": str(uuid.uuid4()),
+        "name": "AI DOJO",
+        "slug": "dojo",
+        "published": True,
+        "problem": "Language learning apps feel flat — text-based drills never prepare you for real conversations.",
+        "target": "Best for: Language learners who want to practice real-world conversations with AI, get instant feedback, and track progress with gamification.",
+        "description": "An immersive Japanese language role-play trainer. Learners practice real-time voice conversations with AI characters across 8+ realistic scenario domains — restaurants, travel, business, healthcare, shopping, school life — with instant feedback, XP, and streak tracking to keep learners coming back.",
+        "features": ["30+ languages", "100+ scenarios", "Real-time voice chat", "Instant AI feedback", "XP & streak tracking", "Cultural context"],
+        "benefits": ["Practice real conversations, not textbooks", "Learn anytime, no scheduling", "Get pronunciation and grammar feedback", "Gamified progress keeps you engaged"],
+        "capabilities": [
+            {"icon": "avatar", "title": "Realistic AI Partners", "body": "Talk with AI characters that understand context and respond naturally."},
+            {"icon": "map", "title": "Immersive Scenarios", "body": "Practice in real-world situations that mirror daily life — restaurants, travel, business, healthcare, shopping, school life."},
+            {"icon": "spark", "title": "Instant Feedback", "body": "Get AI feedback on your pronunciation, grammar, and fluency in real time."},
+            {"icon": "chart", "title": "Progress Tracking", "body": "Earn XP, build streaks, and watch your skills improve over time."},
+        ],
+        "category": "education",
+        "price": "$199/mo",
+        "image_url": "https://ai-pod.net/images/image%20copy%2021.png",
+    },
+    {
+        "id": str(uuid.uuid4()),
+        "name": "AI RECRUITER",
         "slug": "recruiter",
         "published": True,
         "problem": "HR teams post a job, then spend hours manually reading applications to work out who is actually worth a call.",
         "target": "Best for: HR teams and recruiters who need to match open roles with suitable candidates faster, without losing quality.",
-        "description": "An AI-powered recruiting and HR platform.",
-        "features": [],
-        "benefits": [],
+        "description": "An enterprise-grade AI recruitment operating system. Automates candidate screening, interview scheduling, and shortlisting, giving hiring teams a faster, more consistent way to evaluate talent at scale.",
+        "features": ["AI candidate screening", "Interview scheduling", "Automated shortlisting", "Consistent evaluation", "Talent matching at scale"],
+        "benefits": ["Slash time-to-hire", "Consistent candidate evaluation", "Scale screening without adding HR headcount", "Reduce unconscious bias in initial screening"],
         "capabilities": [
             {"icon": "jobs", "title": "Job matching", "body": "Open roles are connected with relevant candidate information automatically."},
             {"icon": "match", "title": "Candidate insight", "body": "See why a candidate fits a role, not just that they applied."},
@@ -54,45 +132,7 @@ PRODUCTS = [
         ],
         "category": "business",
         "price": "$299/mo",
-        "image_url": "",
-    },
-    {
-        "id": str(uuid.uuid4()),
-        "name": "AI Dojo",
-        "slug": "dojo",
-        "published": True,
-        "problem": "Working with AI often feels flat and impersonal, hidden behind a plain text box.",
-        "target": "Best for: Anyone who wants a more engaging, personalised way to interact with AI — for training, support, or simply exploring.",
-        "description": "Interactive AI avatars for a more personal experience.",
-        "features": [],
-        "benefits": [],
-        "capabilities": [
-            {"icon": "avatar", "title": "AI avatars", "body": "Choose an avatar and interact with it directly, in real time."},
-            {"icon": "spark", "title": "Personalised", "body": "Each interaction adapts to you, not a generic script."},
-            {"icon": "chat", "title": "Engaging by design", "body": "Built to be more memorable than a plain chat window."},
-        ],
-        "category": "general",
-        "price": "$199/mo",
-        "image_url": "",
-    },
-    {
-        "id": str(uuid.uuid4()),
-        "name": "AI World",
-        "slug": "world",
-        "published": True,
-        "problem": "Experiencing a place before you visit — or without being able to travel at all — is usually limited to photos and video.",
-        "target": "Best for: Travellers planning a trip, tourism organisations and anyone curious about exploring Japan virtually.",
-        "description": "A virtual world built around Japan.",
-        "features": [],
-        "benefits": [],
-        "capabilities": [
-            {"icon": "map", "title": "Explore Japan", "body": "Move through a virtual representation of Japan's places and culture."},
-            {"icon": "guide", "title": "Guided tours", "body": "Supports guided, tour-style experiences, not just free roaming."},
-            {"icon": "world", "title": "Tourism-ready", "body": "Built to support real tourism and travel-preparation use cases."},
-        ],
-        "category": "general",
-        "price": "$99/mo",
-        "image_url": "",
+        "image_url": "https://ai-pod.net/images/image%20copy%2017.png",
     },
 ]
 
@@ -109,10 +149,10 @@ EMAILS = [
     {
         "id": "E-502",
         "lead_name": "Nile Logistics Group",
-        "product_name": "AI Port",
-        "status": "responded",
+        "product_name": "AIPOD",
+        "status": "sent",
         "subject": "One shared view across all 3 Nile Logistics hubs",
-        "body": "Hi Samuel,\n\nSaw your team is stuck compiling fleet and delivery data by hand across three hubs every week.\n\nAI Port gives every hub a shared task board and turns their combined progress into an automatic report, so head office isn't rebuilding the picture from scratch.\n\nHappy to show you a sample report built from data like yours — interested?\n\nBest,\nAI Pod Team",
+        "body": "Hi Samuel,\n\nSaw your team is stuck compiling fleet and delivery data by hand across three hubs every week.\n\nAIPOD gives every hub a shared task board and turns their combined progress into an automatic report, so head office isn't rebuilding the picture from scratch.\n\nHappy to show you a sample report built from data like yours — interested?\n\nBest,\nAI Pod Team",
     },
     {
         "id": "E-503",
@@ -164,17 +204,17 @@ CONTENT = [
     {
         "id": "N1",
         "type": "news_post",
-        "title": "AI Pod passes 500 businesses served across East Africa",
+        "title": "AIPOD passes 500 businesses served across East Africa",
         "status": "published",
         "date": "Aug 18, 2026",
-        "excerpt": "More than 500 organisations now use AI Pod for task tracking and reporting.",
+        "excerpt": "More than 500 organisations now use AIPOD for task tracking and reporting.",
         "image_url": "",
         "tag": "Company news",
     },
     {
         "id": "Q1",
         "type": "daily_quote",
-        "title": "The best time to find a customer was yesterday. The second best is with AI Pod.",
+        "title": "The best time to find a customer was yesterday. The second best is with AIPOD.",
         "status": "published",
         "date": "Today",
         "excerpt": "",
@@ -376,6 +416,24 @@ async def seed_users(db: AsyncSession) -> None:
     await db.commit()
 
 
+async def seed_brands(db: AsyncSession) -> None:
+    brand_id = "brand-default-akademia"
+    result = await db.execute(select(BrandProfile).where(BrandProfile.id == brand_id))
+    if not result.scalar_one_or_none():
+        db.add(
+            BrandProfile(
+                id=brand_id,
+                name="Akademia Default",
+                user_id="admin@akademia.local",
+                is_active=True,
+                tone_keywords="professional, approachable, clear",
+                voice_description="Brand Voice: Professional yet approachable AI marketing tone.\nValue Proposition: AI-powered marketing automation that delivers results.\nTarget Audience: Businesses looking to scale their marketing with AI.\nKey Messages: Efficiency, accuracy, and consistency in every automated interaction.",
+                primary_color="#1F6F5C",
+            )
+        )
+        await db.commit()
+
+
 if __name__ == "__main__":
     import asyncio
     from sqlalchemy import text
@@ -393,6 +451,8 @@ if __name__ == "__main__":
             await seed_automations(db)
             await seed_content(db)
             await seed_users(db)
+            await seed_brands(db)
+        await seed_brands(db)
 
     asyncio.run(main())
 

@@ -5,6 +5,7 @@ from app.core.database import AsyncSessionLocal, Base, engine
 from app.core.config import settings
 from app.core.seed import (
     seed_automations,
+    seed_brands,
     seed_campaigns,
     seed_content,
     seed_emails,
@@ -23,6 +24,8 @@ async def initialize_database() -> None:
         await connection.run_sync(Base.metadata.create_all)
 
     async with AsyncSessionLocal() as db:
+        await seed_users(db)
+        await seed_brands(db)
         if settings.demo_data:
             await seed_products(db)
             await seed_leads(db)
@@ -30,7 +33,6 @@ async def initialize_database() -> None:
             await seed_emails(db)
             await seed_automations(db)
             await seed_content(db)
-        await seed_users(db)
 
 
 async def initialize_with_retries(attempts: int = 12, delay_seconds: int = 2) -> None:
