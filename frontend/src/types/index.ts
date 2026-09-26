@@ -97,3 +97,15 @@ export interface Content {
   image_url: string;
   tag: string;
 }
+
+export interface BrandProfile {
+  id: string;
+  user_id: string;
+  name: string;
+  voice_description: string;
+  primary_color: string;
+  secondary_color: string;
+  font_family: string;
+  tone_keywords: string;
+  is_active: boolean;
+}

@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/automation", label: "Automation", icon: ICONS.automation },
   { href: "/admin/products", label: "Products", icon: ICONS.products },
   { href: "/admin/content", label: "Content", icon: ICONS.content },
+  { href: "/admin/brands", label: "Brands", icon: ICONS.brands },
   { href: "/admin/settings", label: "Settings", icon: ICONS.settings },
 ];
 

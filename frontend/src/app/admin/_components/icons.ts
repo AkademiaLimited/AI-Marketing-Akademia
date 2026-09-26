@@ -7,4 +7,5 @@ export const ICONS = {
   products: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>',
   settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 000-2l2-1.6-2-3.4-2.4.6a7.7 7.7 0 00-1.7-1L14.8 3h-4l-.5 2.6a7.7 7.7 0 00-1.7 1l-2.4-.6-2 3.4L6.2 11a7.9 7.9 0 000 2l-2 1.6 2 3.4 2.4-.6a7.7 7.7 0 001.7 1L10.8 21h4l.5-2.6a7.7 7.7 0 001.7-1l2.4.6 2-3.4-2-1.6z"/></svg>',
+  brands: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17l6-6-6-6v12z"/><path d="M6 11l6 6 6-6"/></svg>',
 };
