@@ -14,3 +14,5 @@ class GeneratedContent(Base):
     hashtags: Mapped[str] = mapped_column(Text, default="")
     call_to_action: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String, default="generated")
+    scheduled_at: Mapped[str] = mapped_column(String, default="")
+    post_id: Mapped[str] = mapped_column(String, default="")
