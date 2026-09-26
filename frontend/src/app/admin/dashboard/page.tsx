@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetchWithAuth } from "@/lib/api";
 import type { Lead } from "@/types";
 import { useAuth } from "../_components/auth-context";
@@ -29,6 +30,13 @@ type DashboardProgress = {
     details: string;
     created_at: string;
   }>;
+};
+
+type PendingProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  marketing_status: string;
 };
 
 const LEAD_STATUSES = [
@@ -161,8 +169,10 @@ export default function DashboardPage() {
   });
   const [leads, setLeads] = useState<Lead[]>([]);
   const [campaigns, setCampaigns] = useState<{ status: string }[]>([]);
+  const [products, setProducts] = useState<PendingProduct[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   const doFetch = useCallback(async () => {
     if (!token) return;
@@ -173,11 +183,13 @@ export default function DashboardPage() {
         apiFetchWithAuth<DashboardProgress>("/dashboard/progress", token),
         apiFetchWithAuth<Lead[]>("/leads", token),
         apiFetchWithAuth<{ status: string }[]>("/campaigns", token),
+        apiFetchWithAuth<PendingProduct[]>("/products", token),
       ]);
       if (results[0].status === "fulfilled") setSummary(results[0].value);
       if (results[1].status === "fulfilled") setProgress(results[1].value);
       if (results[2].status === "fulfilled") setLeads(results[2].value);
       if (results[3].status === "fulfilled") setCampaigns(results[3].value);
+      if (results[4].status === "fulfilled") setProducts(results[4].value);
       setLastUpdated(new Date());
     } catch {
       // Silent fail — keep showing last data
@@ -197,6 +209,8 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, [doFetch, token]);
 
+  const router = useRouter();
+
   const needsAttention = leads.filter(
     (l) => l.status === "needs-followup" || l.status === "new"
   );
@@ -206,6 +220,31 @@ export default function DashboardPage() {
   const completedAutomations = campaigns.filter((c) => c.status === "completed").length;
 
   const totalLeads = Object.values(progress.lead_funnel).reduce((a, b) => a + b, 0);
+
+  const pendingProducts = products.filter(
+    (p) => p.marketing_status === "pending" || !p.marketing_status
+  );
+
+  const handleRunMarketing = async (product: PendingProduct) => {
+    if (!token) return;
+    setActionLoading((m) => ({ ...m, [product.id]: true }));
+    try {
+      await apiFetchWithAuth(`/products/${product.slug}/publish`, token, { method: "POST" });
+      setProducts((current) =>
+        current.map((p) =>
+          p.id === product.id ? { ...p, marketing_status: "queued" } : p,
+        ),
+      );
+    } catch {
+      // Error handled by UI refresh on next poll
+    } finally {
+      setActionLoading((m) => {
+        const copy = { ...m };
+        delete copy[product.id];
+        return copy;
+      });
+    }
+  };
 
   return (
     <div className="view">
@@ -233,8 +272,47 @@ export default function DashboardPage() {
             className="ml-2 inline-block h-3 w-3 rounded"
             style={{ backgroundColor: progress.active_brand ? "#1F6F5C" : undefined }}
           />
+          <button
+            onClick={() => router.push("/admin/brands")}
+            className="ml-2 text-xs text-slate-500 underline hover:text-slate-700"
+          >
+            Manage brand
+          </button>
         </div>
       )}
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => router.push("/admin/brands")}
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          data-testid="manage-brands-btn"
+        >
+          Manage brands
+        </button>
+        <button
+          onClick={() => router.push("/admin/products")}
+          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          data-testid="view-products-btn"
+        >
+          View products
+        </button>
+        <button
+          onClick={() => router.push("/admin/leads")}
+          className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
+          data-testid="view-leads-btn"
+        >
+          View leads
+        </button>
+        {pendingProducts.length > 0 && (
+          <button
+            onClick={() => router.push("/admin/products")}
+            className="rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800"
+            data-testid="generate-content-btn"
+          >
+            Generate content ({pendingProducts.length})
+          </button>
+        )}
+      </div>
 
       <div className="stat-row">
         <div className="card stat-card">
@@ -305,7 +383,34 @@ export default function DashboardPage() {
             <span className="text-green-700">Completed: {completedAutomations}</span>
           </div>
         </div>
-      </div>
+       </div>
+
+      {pendingProducts.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-3 text-sm font-medium text-slate-700">Products ready for marketing</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            These products have not yet been published to the marketing pipeline. Click to trigger.
+          </p>
+          <div className="space-y-2">
+            {pendingProducts.map((product) => (
+              <div key={product.id} className="flex items-center justify-between rounded-md border border-slate-100 px-4 py-2">
+                <div>
+                  <span className="font-medium text-slate-900">{product.name}</span>
+                  <span className="text-xs text-slate-500"> /{product.slug}</span>
+                </div>
+                <button
+                  onClick={() => void handleRunMarketing(product)}
+                  disabled={actionLoading[product.id]}
+                  className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  data-testid={`publish-${product.id}`}
+                >
+                  {actionLoading[product.id] ? "Publishing..." : "Run marketing"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card pipeline">
         <div className="label">Lead Pipeline</div>

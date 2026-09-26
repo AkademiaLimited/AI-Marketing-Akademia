@@ -2,6 +2,10 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import DashboardPage from '@/app/admin/dashboard/page';
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
 jest.mock('@/lib/api', () => ({
   apiFetchWithAuth: jest.fn(),
   apiFetch: jest.fn(),
@@ -37,6 +41,15 @@ const DEFAULT_PROGRESS = {
   recent_activity: [],
 };
 
+const DEFAULT_PRODUCTS = [
+  {
+    id: 'prod-1',
+    slug: 'pod',
+    name: 'AI Pod',
+    marketing_status: 'pending',
+  },
+];
+
 describe('AdminDashboard', () => {
   beforeEach(() => {
     (apiFetchWithAuth as jest.Mock).mockClear();
@@ -46,6 +59,7 @@ describe('AdminDashboard', () => {
     (apiFetchWithAuth as jest.Mock)
       .mockResolvedValueOnce(DEFAULT_SUMMARY)
       .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -61,6 +75,7 @@ describe('AdminDashboard', () => {
     (apiFetchWithAuth as jest.Mock)
       .mockResolvedValueOnce(DEFAULT_SUMMARY)
       .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -90,6 +105,7 @@ describe('AdminDashboard', () => {
           last_contact: '2 days ago',
         },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     render(<DashboardPage />);
@@ -103,6 +119,7 @@ describe('AdminDashboard', () => {
     (apiFetchWithAuth as jest.Mock)
       .mockResolvedValueOnce(DEFAULT_SUMMARY)
       .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -120,6 +137,7 @@ describe('AdminDashboard', () => {
       .mockResolvedValueOnce(DEFAULT_SUMMARY)
       .mockResolvedValueOnce({ ...DEFAULT_PROGRESS, active_brand: 'Akademia Default' })
       .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
     render(<DashboardPage />);
@@ -127,5 +145,39 @@ describe('AdminDashboard', () => {
       expect(screen.getByText('Active brand:')).toBeInTheDocument();
     });
     expect(screen.getByText('Akademia Default')).toBeInTheDocument();
+  });
+
+  it('shows quick action buttons', async () => {
+    (apiFetchWithAuth as jest.Mock)
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(DEFAULT_PRODUCTS);
+
+    render(<DashboardPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId('manage-brands-btn')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('view-products-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('view-leads-btn')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('generate-content-btn')).toBeInTheDocument();
+    });
+  });
+
+  it('shows pending products with run marketing button', async () => {
+    (apiFetchWithAuth as jest.Mock)
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(DEFAULT_PRODUCTS);
+
+    render(<DashboardPage />);
+    await waitFor(() => {
+      expect(screen.getByText('AI Pod')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('publish-prod-1')).toBeInTheDocument();
   });
 });
