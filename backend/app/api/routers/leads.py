@@ -18,7 +18,7 @@ async def research_email_draft(
     _admin=Depends(get_current_admin),
 ):
     try:
-        return await research_lead_and_draft_email(db, lead_id)
+        return await research_lead_and_draft_email(db, lead_id, user_id=_admin.id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:

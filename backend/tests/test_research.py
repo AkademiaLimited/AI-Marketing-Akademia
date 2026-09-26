@@ -77,3 +77,34 @@ async def test_research_rejects_local_websites(db_session, research_lead):
 
     with pytest.raises(ValueError, match="Local websites are not allowed"):
         await research_lead_and_draft_email(db_session, research_lead.id)
+
+
+@pytest.mark.anyio
+async def test_research_injects_brand_context(
+    db_session, research_lead, seed_brand_profile, monkeypatch,
+):
+    """Verify that brand_context is fetched and passed to call_groq_json when user_id is provided."""
+    captured = {}
+
+    async def mock_call_groq_json(prompt, system_prompt, **kwargs):
+        captured["brand_context"] = kwargs.get("brand_context")
+        return {
+            "qualification_score": 0.5,
+            "qualification_reason": "test",
+            "subject": "test",
+            "body": "test",
+        }
+
+    monkeypatch.setattr("app.services.research.call_groq_json", mock_call_groq_json)
+
+    from app.services.research import research_lead_and_draft_email
+
+    await research_lead_and_draft_email(
+        db_session,
+        research_lead.id,
+        website_text="Testing brand context injection.",
+        user_id=seed_brand_profile.user_id,
+    )
+
+    assert captured["brand_context"]
+    assert "Brand Voice" in captured["brand_context"]

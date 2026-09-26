@@ -16,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base
 from app.models.user import User
+from app.models.brand import BrandProfile
 from app.main import app
 
 
@@ -69,3 +70,22 @@ async def client(db_session: AsyncSession):
 @pytest.fixture
 async def test_client(client: AsyncClient):
     return TestClient(app)
+
+
+@pytest.fixture
+async def seed_brand_profile(db_session: AsyncSession):
+    brand = BrandProfile(
+        id="brand-test-1",
+        user_id="test-admin",
+        name="Test Brand",
+        voice_description="Brand Voice: Professional yet approachable AI marketing tone.",
+        primary_color="#1F6F5C",
+        secondary_color="#3AAFA9",
+        font_family="Inter, sans-serif",
+        tone_keywords="professional,approachable,innovative",
+        is_active=True,
+    )
+    db_session.add(brand)
+    await db_session.commit()
+    await db_session.refresh(brand)
+    return brand

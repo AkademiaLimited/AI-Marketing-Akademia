@@ -12,6 +12,7 @@ from app.ai.groq_client import call_groq_json
 from app.models.email import Email
 from app.models.lead import Lead
 from app.models.product import Product
+from app.services.brand_service import get_brand_context
 from app.services.tracking import create_workflow_run, finish_workflow_run, record_activity
 
 
@@ -79,6 +80,8 @@ class ResearchState(TypedDict, total=False):
     lead_id: str
     workflow_run_id: str
     website_text: str | None
+    brand_context: str
+    user_id: str
     lead: Lead
     product: Product
     research_text: str
@@ -103,7 +106,11 @@ def build_research_email_graph(db: AsyncSession):
             if not product:
                 raise ValueError("Lead product not found")
 
-            return {"lead": lead, "product": product}
+            brand_context = state.get("brand_context", "")
+            if not brand_context and state.get("user_id"):
+                brand_context = await get_brand_context(state["user_id"], db)
+
+            return {"lead": lead, "product": product, "brand_context": brand_context}
         except Exception as exc:
             await record_activity(
                 db,
@@ -146,6 +153,7 @@ def build_research_email_graph(db: AsyncSession):
     async def qualify_and_draft(state: ResearchState) -> ResearchState:
         lead = state["lead"]
         product = state["product"]
+        brand_context = state.get("brand_context", "")
         try:
             result = await call_groq_json(
                 f"Lead company: {lead.company}\n"
@@ -156,6 +164,7 @@ def build_research_email_graph(db: AsyncSession):
                 f"Product description: {product.description}\n\n"
                 f"Website text:\n{state['research_text']}",
                 system_prompt=RESEARCH_SYSTEM_PROMPT,
+                brand_context=brand_context or None,
             )
             score = float(result.get("qualification_score", 0))
             score = max(0.0, min(1.0, score))
@@ -258,16 +267,27 @@ async def research_lead_and_draft_email(
     lead_id: str,
     *,
     website_text: str | None = None,
+    user_id: str | None = None,
 ) -> dict[str, Any]:
+    """Run the research + email draft workflow for a single lead.
+
+    Args:
+        db: Async database session.
+        lead_id: The lead to research.
+        website_text: Optional pre-fetched website text.
+        user_id: Optional user ID to fetch brand context for on-brand AI output.
+    """
     run = await create_workflow_run(db, "research_email_draft", lead_id)
     try:
-        final_state = await build_research_email_graph(db).ainvoke(
-            {
-                "lead_id": lead_id,
-                "website_text": website_text,
-                "workflow_run_id": run.id,
-            }
-        )
+        initial_state: ResearchState = {
+            "lead_id": lead_id,
+            "website_text": website_text,
+            "workflow_run_id": run.id,
+        }
+        if user_id:
+            initial_state["user_id"] = user_id
+
+        final_state = await build_research_email_graph(db).ainvoke(initial_state)
         await finish_workflow_run(db, run, status="completed")
         result = final_state["result"]
         result["workflow_run_id"] = run.id

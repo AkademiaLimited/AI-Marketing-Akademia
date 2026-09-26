@@ -70,7 +70,10 @@ async def publish_product(slug: str, db: AsyncSession = Depends(get_db), _admin=
     await db.refresh(product)
 
     pipeline = chain(
-        celery_app.signature("app.tasks.content.generate_content", args=[product.id]),
+        celery_app.signature(
+            "app.tasks.content.generate_content",
+            args=[product.id, _admin.id],
+        ),
         celery_app.signature("app.tasks.content.select_channels"),
         celery_app.signature("app.tasks.content.publish_content"),
     )

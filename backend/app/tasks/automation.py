@@ -13,6 +13,7 @@ from app.core.database import AsyncSessionLocal
 from app.models.automation import Automation
 from app.models.lead import Lead
 from app.models.product import Product
+from app.services.brand_service import get_brand_context
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ Return ONLY valid JSON in this exact format:
 """
 
 
-async def _get_leads_for_product(product: Product) -> list[dict]:
+async def _get_leads_for_product(product: Product, brand_context: str = "") -> list[dict]:
     target_industry = product.target or "technology"
     problem = product.problem or "needs AI solutions"
 
@@ -63,14 +64,16 @@ async def _get_leads_for_product(product: Product) -> list[dict]:
         f"who could benefit from {product.name}."
     )
 
-    result = await call_groq_json(prompt, system_prompt=SYSTEM_PROMPT_DISCOVER)
+    result = await call_groq_json(
+        prompt, system_prompt=SYSTEM_PROMPT_DISCOVER, brand_context=brand_context or None
+    )
     if isinstance(result, list):
         return result
     return result.get("leads", [])
 
 
 async def _analyze_and_store_lead(
-    db: AsyncSession, lead_data: dict, product: Product
+    db: AsyncSession, lead_data: dict, product: Product, brand_context: str = ""
 ) -> Lead:
     reasoning_prompt = (
         f"Company: {lead_data['company']}\n"
@@ -85,6 +88,7 @@ async def _analyze_and_store_lead(
     reasoning = await call_groq(
         reasoning_prompt,
         system_prompt="You are a B2B marketing strategist. Give concise reasoning.",
+        brand_context=brand_context or None,
         max_tokens=512,
     )
 
@@ -108,9 +112,12 @@ async def _analyze_and_store_lead(
     return lead
 
 
-async def discover_leads_for_product(product_slug: str) -> dict:
+async def discover_leads_for_product(product_slug: str, user_id: str | None = None) -> dict:
     """
     Core async logic: discover new leads for a product using AI.
+
+    Optionally fetches brand context for the given user_id and injects it
+    into the Groq system prompt so generated leads align with brand voice.
 
     Can be called directly in tests. The Celery task wraps this with asyncio.run.
     """
@@ -122,10 +129,14 @@ async def discover_leads_for_product(product_slug: str) -> dict:
         if not product:
             raise ValueError(f"Product with slug '{product_slug}' not found")
 
-        leads = await _get_leads_for_product(product)
+        brand_context = ""
+        if user_id:
+            brand_context = await get_brand_context(user_id, db)
+
+        leads = await _get_leads_for_product(product, brand_context)
         created = []
         for lead_data in leads:
-            lead = await _analyze_and_store_lead(db, lead_data, product)
+            lead = await _analyze_and_store_lead(db, lead_data, product, brand_context)
             created.append(lead.id)
 
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -153,18 +164,19 @@ async def discover_leads_for_product(product_slug: str) -> dict:
 
 
 @celery_app.task(bind=True)
-def run_lead_discovery(self, product_slug: str) -> dict:
+def run_lead_discovery(self, product_slug: str, user_id: str | None = None) -> dict:
     """
     Celery task: Discover new leads for a given product using AI.
 
     Args:
         product_slug: The slug of the product to run discovery for.
+        user_id: Optional user ID to fetch brand context for on-brand lead generation.
 
     Returns:
         Dict with summary: {"product": str, "leads_found": int, "timestamp": str}
     """
     self.update_state(state="STARTED")
-    result = asyncio.run(discover_leads_for_product(product_slug))
+    result = asyncio.run(discover_leads_for_product(product_slug, user_id))
     self.update_state(
         state="SUCCESS",
         meta=result,

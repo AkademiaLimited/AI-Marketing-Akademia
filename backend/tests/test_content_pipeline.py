@@ -202,3 +202,18 @@ async def test_publish_content_creates_logs(db_session, seed_business_product, m
     product = prod_result.scalar_one()
     assert product.marketing_status == "completed"
     assert "Published to 2 channels" in product.marketing_result
+
+
+@pytest.mark.anyio
+async def test_generate_content_with_brand_context(
+    db_session, seed_business_product, monkeypatch, seed_brand_profile,
+):
+    monkeypatch.setattr("app.tasks.content.call_groq_json", mock_call_groq_json)
+    monkeypatch.setattr("app.tasks.content._get_async_session", lambda: db_session)
+
+    from app.tasks.content import generate_content_for_product
+
+    result = await generate_content_for_product("prod-business-1", user_id=seed_brand_profile.user_id)
+
+    assert result["brand_context"]
+    assert "Brand Voice" in result["brand_context"]
