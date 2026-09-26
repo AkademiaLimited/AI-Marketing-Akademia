@@ -13,6 +13,7 @@ from app.core.seed import (
     seed_users,
 )
 from app.models.brand import BrandProfile  # noqa: F401 — ensure table is created
+from app.models.workflow import WorkflowRun, MarketingActivity  # noqa: F401 — ensure tables are created
 
 logger = logging.getLogger(__name__)
 
