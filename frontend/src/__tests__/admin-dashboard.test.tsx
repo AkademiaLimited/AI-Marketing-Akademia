@@ -17,6 +17,26 @@ jest.mock('@/app/admin/_components/auth-context', () => ({
 
 const { apiFetchWithAuth } = require('@/lib/api') as { apiFetchWithAuth: jest.Mock };
 
+const DEFAULT_SUMMARY = {
+  new: 10,
+  contacted: 5,
+  responded: 3,
+  needs_followup: 2,
+  meetings: 1,
+  customers: 0,
+  lost: 1,
+};
+
+const DEFAULT_PROGRESS = {
+  marketing_pipeline: { pending: 0, queued: 0, running: 2, completed: 1, failed: 0 },
+  lead_funnel: {},
+  email_pipeline: {},
+  campaign_status: {},
+  workflow_runs: {},
+  active_brand: null,
+  recent_activity: [],
+};
+
 describe('AdminDashboard', () => {
   beforeEach(() => {
     (apiFetchWithAuth as jest.Mock).mockClear();
@@ -24,15 +44,8 @@ describe('AdminDashboard', () => {
 
   it('renders dashboard heading', async () => {
     (apiFetchWithAuth as jest.Mock)
-      .mockResolvedValueOnce({
-        new: 10,
-        contacted: 5,
-        responded: 3,
-        needs_followup: 2,
-        meetings: 1,
-        customers: 0,
-        lost: 1,
-      })
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -46,15 +59,8 @@ describe('AdminDashboard', () => {
 
   it('renders pipeline stages from summary', async () => {
     (apiFetchWithAuth as jest.Mock)
-      .mockResolvedValueOnce({
-        new: 10,
-        contacted: 5,
-        responded: 3,
-        needs_followup: 2,
-        meetings: 1,
-        customers: 0,
-        lost: 1,
-      })
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -68,15 +74,8 @@ describe('AdminDashboard', () => {
 
   it('shows needs attention when leads exist', async () => {
     (apiFetchWithAuth as jest.Mock)
-      .mockResolvedValueOnce({
-        new: 10,
-        contacted: 5,
-        responded: 3,
-        needs_followup: 2,
-        meetings: 1,
-        customers: 0,
-        lost: 1,
-      })
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
       .mockResolvedValueOnce([
         {
           id: '1',
@@ -98,5 +97,35 @@ describe('AdminDashboard', () => {
       expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     });
     expect(screen.getByText('Beta Ltd')).toBeInTheDocument();
+  });
+
+  it('renders marketing pipeline bars from progress data', async () => {
+    (apiFetchWithAuth as jest.Mock)
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce(DEFAULT_PROGRESS)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    render(<DashboardPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Marketing Pipeline')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Lead Funnel')).toBeInTheDocument();
+    expect(screen.getByText('Email Pipeline')).toBeInTheDocument();
+    expect(screen.getByText('Campaign Status')).toBeInTheDocument();
+  });
+
+  it('shows active brand when set', async () => {
+    (apiFetchWithAuth as jest.Mock)
+      .mockResolvedValueOnce(DEFAULT_SUMMARY)
+      .mockResolvedValueOnce({ ...DEFAULT_PROGRESS, active_brand: 'Akademia Default' })
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    render(<DashboardPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Active brand:')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Akademia Default')).toBeInTheDocument();
   });
 });

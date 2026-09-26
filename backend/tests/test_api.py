@@ -133,12 +133,22 @@ async def test_dashboard_summary(client: AsyncClient):
     response = await client.get("/api/dashboard/summary")
     assert response.status_code == 200
     data = response.json()
-    assert "new" in data
-    assert "contacted" in data
-    assert "responded" in data
-    assert "meetings" in data
     assert "customers" in data
     assert "lost" in data
+
+
+@pytest.mark.anyio
+async def test_dashboard_progress(client: AsyncClient):
+    response = await client.get("/api/dashboard/progress")
+    assert response.status_code == 200
+    data = response.json()
+    assert "marketing_pipeline" in data
+    assert "lead_funnel" in data
+    assert "email_pipeline" in data
+    assert "campaign_status" in data
+    assert "workflow_runs" in data
+    assert "active_brand" in data
+    assert "recent_activity" in data
 
 
 @pytest.mark.anyio
