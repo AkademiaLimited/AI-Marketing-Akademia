@@ -12,6 +12,7 @@ from app.models.lead import Lead
 from app.models.campaign import Campaign
 from app.models.generated_content import GeneratedContent
 from app.models.publish_log import PublishLog
+from app.models.brand import BrandProfile
 from app.core.auth import hash_password
 
 

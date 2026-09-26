@@ -12,6 +12,7 @@ from app.core.seed import (
     seed_products,
     seed_users,
 )
+from app.models.brand import BrandProfile  # noqa: F401 — ensure table is created
 
 logger = logging.getLogger(__name__)
 
