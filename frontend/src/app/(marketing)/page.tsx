@@ -3,6 +3,9 @@ import { apiFetch } from "@/lib/api";
 import type { Product } from "@/types";
 import { PRODUCTS, getProductBySlug, getProductByName } from "./_lib/marketing-config";
 
+export const dynamic = "force-dynamic";
+export const fetch = "no-store";
+
 export default async function HomePage() {
   let apiProducts: Product[] = [];
   try {
@@ -61,7 +64,7 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="sec-head">
             <h2>Our products</h2>
-            <p>Four tools, four different jobs. See what each one actually does.</p>
+            <p>Six tools, six different jobs. See what each one actually does.</p>
           </div>
           <div className="products-grid">
             {publishedProducts.length === 0 && (
@@ -80,10 +83,14 @@ export default async function HomePage() {
               const dark = m?.dark || '#000000';
               const desc = p.description || m?.description || '';
 
-              return (
+               return (
                 <div key={p.id || p.slug} className="pcard" style={{ '--accent': accent, '--accent-tint': tint, '--accent-dark': dark } as React.CSSProperties}>
                   <div className="pcard-visual">
-                    {SvgComponent}
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="pcard-img" loading="lazy" />
+                    ) : (
+                      SvgComponent
+                    )}
                   </div>
                   <div className="pcard-body">
                     <h3>{p.name}</h3>
