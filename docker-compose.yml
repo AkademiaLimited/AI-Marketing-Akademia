@@ -21,11 +21,16 @@ services:
     networks: [ akademia_net ]
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://backend:8000/api
     restart: unless-stopped
     depends_on: [ backend ]
     ports:
       - "3003:3003"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000/api
     networks: [ akademia_net ]
 
   redis:

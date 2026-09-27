@@ -42,10 +42,14 @@ export default async function ProductsOverviewPage() {
               const dark = m?.dark || '#000000';
               const desc = p.description || m?.description || '';
 
-              return (
+               return (
                 <div key={p.id} className="pcard full" style={{ '--accent': accent, '--accent-tint': tint, '--accent-dark': dark } as React.CSSProperties}>
                   <div className="pcard-visual">
-                    {SvgComponent}
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="pcard-img" loading="lazy" />
+                    ) : (
+                      SvgComponent
+                    )}
                   </div>
                   <div className="pcard-body">
                     <h3>{p.name}</h3>
