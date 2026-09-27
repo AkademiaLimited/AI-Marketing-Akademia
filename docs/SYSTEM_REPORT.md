@@ -4,7 +4,7 @@
 
 AI Marketing Akademia is a full-stack B2B marketing automation platform with two sides:
 
-- **Public marketing website** — Next.js 16 server-rendered pages showcasing 4 AI products (AI Pod, AI Recruiter, AI Dojo, AI World), a contact form, and company content.
+- **Public marketing website** — Next.js 16 server-rendered pages showcasing 6 AI products (AI AVATAR AKADEMIA, AIPOD, VIRTUAL WORLD, UgaJapa Translation, AI DOJO, AI RECRUITER), a contact form, and company content.
 - **Authenticated admin workspace** — A password-protected dashboard for managing products, leads, campaigns, email drafts, content, automations, and AI workflows.
 
 The system uses **FastAPI** (Python) for the backend, **Next.js 16** (TypeScript/React) for the frontend, **PostgreSQL** for data, **Redis + Celery** for background tasks, and **Groq** (LLM) for AI content generation and lead qualification. **LangGraph** orchestrates the lead research workflow.
@@ -505,7 +505,7 @@ rejected
 4. Retries 12 times with 2-second delay (waits for PostgreSQL in Docker)
 
 **Seed data (when DEMO_DATA=true):**
-- 4 products (AI Pod, AI Recruiter, AI Dojo, AI World)
+    - 6 products (AI AVATAR AKADEMIA, AIPOD, VIRTUAL WORLD, UgaJapa Translation, AI DOJO, AI RECRUITER)
 - 3 leads (Kampala FreshFoods, Nile Logistics, Highland People)
 - 2 campaigns
 - 3 emails
@@ -587,7 +587,7 @@ curl http://localhost:8000/health
 
 A potential B2B client visits `aiakademia.com` and:
 
-1. **Discovers products** — browses 4 AI products (AI Pod, AI Recruiter, AI Dojo, AI World) with clear problem/solution descriptions
+1. **Discovers products** — browses 6 AI products (AI AVATAR AKADEMIA, AIPOD, VIRTUAL WORLD, UgaJapa Translation, AI DOJO, AI RECRUITER) with clear problem/solution descriptions
 2. **Contacts the company** — fills out the contact form with their name, email, company, message, and product interest
 3. **Receives a response** — the lead is created in the system, and the admin team is notified to follow up
 
